@@ -243,9 +243,9 @@ def train_loop(model, device, model_save_path, training_loader, testing_loader, 
 
         model.save(os.path.join(model_save_path, f"epoch_{epoch+1}"))
 
-def inference(str, model, tokenizer):
+def inference(offer, model, tokenizer):
     pipe = pipeline(task="token-classification", model=model.to("cpu"), tokenizer=tokenizer, aggregation_strategy="simple")
-    return pipe(str)
+    return pipe(offer)
 
 
 if __name__ == "__main__":
