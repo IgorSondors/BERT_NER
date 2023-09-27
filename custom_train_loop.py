@@ -121,7 +121,7 @@ def load_model(model_pth, device, label2id, id2label):
                                                    label2id=label2id)
     return tokenizer, model.to(device)
 
-def valid(model, testing_loader, id2label):
+def valid(model, testing_loader, id2label, device):
     # put model in evaluation mode
     model.eval()
     
@@ -243,7 +243,7 @@ def train_loop(model, device, model_save_path, training_loader, testing_loader, 
         print(f"Training loss epoch: {epoch_loss}")
         print(f"Training accuracy epoch: {tr_accuracy}\n")
 
-        report = valid(model, testing_loader, id2label)
+        report = valid(model, testing_loader, id2label, device)
         print(f"{report}\n")
 
         model.save_pretrained(os.path.join(model_save_path, f"epoch_{epoch+1}"))
