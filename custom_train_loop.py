@@ -1,8 +1,7 @@
-from transformers import BertTokenizer, BertForTokenClassification
+from transformers import BertTokenizer, BertForTokenClassification, pipeline, get_linear_schedule_with_warmup
 from seqeval.metrics import classification_report
 from torch.utils.data import Dataset, DataLoader
 from sklearn.metrics import accuracy_score
-from transformers import pipeline
 import pandas as pd
 import torch
 import os
@@ -182,8 +181,12 @@ def valid(model, testing_loader, id2label):
 
 def train_loop(model, device, model_save_path, training_loader, testing_loader, id2label, num_epochs, initial_lr, max_grad_norm):
     # optimizer = torch.optim.Adam(params=model.parameters(), lr=initial_lr)
-    optimizer = torch.optim.AdamW(model.parameters(), lr=initial_lr, weight_decay=0.01)  
+    optimizer = torch.optim.AdamW(model.parameters(), lr=initial_lr, weight_decay=0.01)  # Using AdamW optimizer
 
+    steps_per_epoch = len(training_loader)
+    total_steps = steps_per_epoch * num_epochs
+    scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps=0, num_training_steps=total_steps)
+    
     for epoch in range(num_epochs):
         print(f"Training epoch: {epoch + 1}")
         tr_loss, tr_accuracy = 0, 0
@@ -233,6 +236,7 @@ def train_loop(model, device, model_save_path, training_loader, testing_loader, 
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
+            scheduler.step()
 
         epoch_loss = tr_loss / nb_tr_steps
         tr_accuracy = tr_accuracy / nb_tr_steps
