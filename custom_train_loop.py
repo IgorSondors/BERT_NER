@@ -243,11 +243,11 @@ def train_loop(model, device, model_save_path, training_loader, testing_loader, 
         print(f"{report}\n")
 
         model.save_pretrained(os.path.join(model_save_path, f"epoch_{epoch+1}"))
+        tokenizer.save_pretrained(os.path.join(model_save_path, f"epoch_{epoch+1}"))
 
 def inference(offer, model, tokenizer):
     pipe = pipeline(task="token-classification", model=model.to("cpu"), tokenizer=tokenizer, aggregation_strategy="simple")
     return pipe(offer)
-
 
 if __name__ == "__main__":
     model_save_path = '/home/sondors/Documents/price/BERT_NER/weights'
