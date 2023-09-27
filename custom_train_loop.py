@@ -181,7 +181,8 @@ def valid(model, testing_loader, id2label):
     return classification_report([labels], [predictions])
 
 def train_loop(model, device, model_save_path, training_loader, testing_loader, id2label, num_epochs, initial_lr, max_grad_norm):
-    optimizer = torch.optim.Adam(params=model.parameters(), lr=initial_lr)
+    # optimizer = torch.optim.Adam(params=model.parameters(), lr=initial_lr)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=initial_lr, weight_decay=0.01)  
 
     for epoch in range(num_epochs):
         print(f"Training epoch: {epoch + 1}")
@@ -241,7 +242,7 @@ def train_loop(model, device, model_save_path, training_loader, testing_loader, 
         report = valid(model, testing_loader, id2label)
         print(f"{report}\n")
 
-        model.save(os.path.join(model_save_path, f"epoch_{epoch+1}"))
+        model.save_pretrained(os.path.join(model_save_path, f"epoch_{epoch+1}"))
 
 def inference(offer, model, tokenizer):
     pipe = pipeline(task="token-classification", model=model.to("cpu"), tokenizer=tokenizer, aggregation_strategy="simple")
