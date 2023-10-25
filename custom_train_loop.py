@@ -114,11 +114,11 @@ def load_data(tokenizer, pth, train_size, label2id, train_batch_size, val_batch_
     return training_loader, testing_loader
 
 def load_model(model_pth, device, label2id, id2label):
-    tokenizer = BertTokenizer.from_pretrained(model_pth)
     model = BertForTokenClassification.from_pretrained(model_pth, 
-                                                   num_labels=len(id2label),
-                                                   id2label=id2label,
-                                                   label2id=label2id)
+                                        num_labels=len(id2label),
+                                        id2label=id2label,
+                                        label2id=label2id)
+    tokenizer = BertTokenizer.from_pretrained(model_pth)
     return tokenizer, model.to(device)
 
 def valid(model, testing_loader, id2label, device):
@@ -285,4 +285,3 @@ if __name__ == "__main__":
     tokenizer, model = load_model(model_pth, device, label2id, id2label)
     training_loader, testing_loader = load_data(tokenizer, pth, train_size, label2id, train_batch_size, val_batch_size, max_seq_length)
     train_loop(model, device, model_save_path, training_loader, testing_loader, id2label, num_epochs, initial_lr, max_grad_norm)
-
