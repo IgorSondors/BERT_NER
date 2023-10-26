@@ -277,13 +277,13 @@ if __name__ == "__main__":
                 5: 'B-line', 
                 0: 'O'}
     
-    max_seq_length = 512
+    max_seq_length = 2048
     train_batch_size = 2
     val_batch_size = 2
     initial_lr = 1e-05
     max_grad_norm = 10
-    train_size = 0.8
-    num_epochs = 1
+    train_size = 0.9
+    num_epochs = 10
 
     tokenizer, model = load_model(model_pth, device, label2id, id2label)
     training_loader, testing_loader = load_data(tokenizer, pth, train_size, label2id, train_batch_size, val_batch_size, max_seq_length)
