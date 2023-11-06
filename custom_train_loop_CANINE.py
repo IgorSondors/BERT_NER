@@ -86,7 +86,7 @@ def tokenize_and_preserve_labels(sentence, text_labels, tokenizer):
 
     return tokenized_sentence, labels
 
-def load_data(tokenizer, pth, train_size, label2id, train_batch_size, val_batch_size, max_seq_length):
+def load_data_split(tokenizer, pth, train_size, label2id, train_batch_size, val_batch_size, max_seq_length):
     df_csv = pd.read_csv(pth, sep=';')
     train_dataset = df_csv.sample(frac=train_size,random_state=200)
     test_dataset = df_csv.drop(train_dataset.index).reset_index(drop=True)
@@ -113,6 +113,21 @@ def load_data(tokenizer, pth, train_size, label2id, train_batch_size, val_batch_
     testing_loader = DataLoader(testing_set, **test_params)
 
     return training_loader, testing_loader
+
+def load_data(tokenizer, pth, label2id, batch_size, max_seq_length):
+    df_csv = pd.read_csv(pth, sep=';')
+    
+    print("FULL Dataset: {}".format(df_csv.shape))
+
+    training_set = dataset(df_csv, tokenizer, max_seq_length, label2id)
+
+    train_params = {'batch_size': batch_size,
+                'shuffle': True,
+                'num_workers': 0
+                }
+
+    training_loader = DataLoader(training_set, **train_params)
+    return training_loader
 
 def load_model(model_pth, device, label2id, id2label):
 
@@ -256,36 +271,42 @@ def inference(offer, model, tokenizer):
     return pipe(offer)
 
 if __name__ == "__main__":
-    model_save_path = '/home/sondors/Documents/price/BERT_NER/weights'
-    pth = '/home/sondors/Documents/price/BERT_NER/csv/NER_2609.csv'
-    # model_pth = "/home/sondors/29887"
+    model_save_path = '/home/sondors/Documents/price/BERT_NER/weights/CANINE/our_data'
+    train_csv_pth = '/home/sondors/Documents/price/BERT_NER/csv/prod_train/train_08our_1opensource.csv'
+    test_csv_pth = '/home/sondors/Documents/price/BERT_NER/csv/prod_train/test_02our.csv'
+    model_pth = "/home/sondors/29887"
     # model_pth = 'bert-base-uncased'
-    model_pth = "google/canine-c"
     device = 'cuda'
 
     label2id = {'B-width': 1,
-            'B-height': 2,
-            'B-radius': 3,
-            'B-brand': 4,
-            'B-line': 5,
-            'O': 0}
+                'B-height': 2,
+                'B-radius': 3,
+                'B-brand': 4,
+                'B-line': 5,
+                'I-line': 6,
+                'O': 0}
     
     id2label = {1: 'B-width',
                 2: 'B-height', 
                 3: 'B-radius', 
                 4: 'B-brand', 
                 5: 'B-line', 
+                6: 'I-line',
                 0: 'O'}
     
+    model_pth = "google/canine-c"
+    device = 'cuda'
+
     max_seq_length = 2048
     train_batch_size = 2
-    val_batch_size = 2
+    val_batch_size = 1
     initial_lr = 1e-05
     max_grad_norm = 10
-    train_size = 0.9
-    num_epochs = 10
+    # train_size = 0.9
+    num_epochs = 15
 
     tokenizer, model = load_model(model_pth, device, label2id, id2label)
-    training_loader, testing_loader = load_data(tokenizer, pth, train_size, label2id, train_batch_size, val_batch_size, max_seq_length)
+    training_loader = load_data(tokenizer, train_csv_pth, label2id, train_batch_size, max_seq_length)
+    testing_loader = load_data(tokenizer, test_csv_pth, label2id, val_batch_size, max_seq_length)
     train_loop(model, device, model_save_path, training_loader, testing_loader, id2label, num_epochs, initial_lr, max_grad_norm)
 
