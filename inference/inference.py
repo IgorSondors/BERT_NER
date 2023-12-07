@@ -161,7 +161,7 @@ if __name__ == "__main__":
 
         def del_short_str(df, columns):
             for column in columns:
-                df[column] = df[column].apply(lambda x: '' if (isinstance(x, str) and len(str(x)) < 2) else x)
+                df[column] = df[column].apply(lambda x: '' if (isinstance(x, str) and len(str(re.sub(r"[^0123456789]","", x))) < 2) else x)
             return df
     
         columns_to_check = ['width_pred', 'height_pred', 'radius_pred', 'v_ind_pred']
