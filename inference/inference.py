@@ -87,7 +87,7 @@ def process_digits(txt):
         return re.sub(r"[^0123456789A-Za-z]","", txt)
 
 def process_brand_line(txt):
-    return re.sub(r"[^0123456789A_Za-zА-Яа-я/ ]","", txt)
+    return re.sub(r"[^0123456789A-Za-zА-Яа-я/ ]","", txt)
 
 if __name__ == "__main__":
 
