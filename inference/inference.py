@@ -27,8 +27,8 @@ def load_model_LUKE(model_pth, device, label2id, id2label):
     tokenizer = AutoTokenizer.from_pretrained(model_pth)
     return tokenizer, model.to(device)
 
-def inference(offer, model, tokenizer):
-    pipe = pipeline(task="ner", model=model, tokenizer=tokenizer, aggregation_strategy="simple")
+def inference(offer, model, tokenizer, device):
+    pipe = pipeline(task="ner", model=model, tokenizer=tokenizer, aggregation_strategy="simple", device=device)
     return pipe(offer)
 
 def brand_line_width_height_radius(result):
@@ -48,10 +48,10 @@ def brand_line_width_height_radius(result):
         entities[key] = ''.join(value)
     return entities
 
-def apply_on_df(model, tokenizer, df, column = 'offer'):
+def apply_on_df(model, tokenizer, df, device, column = 'offer'):
     for index, row in df.iterrows():
         offer = row[column]
-        result = inference(offer, model, tokenizer)
+        result = inference(offer, model, tokenizer, device)
         entities = brand_line_width_height_radius(result)
 
         # Заполнение DataFrame
@@ -131,7 +131,7 @@ if __name__ == "__main__":
                 9: 'I-v_ind',
                 0: 'O'}
 
-    device = "cpu"
+    device = "cuda:0"
 
     # model_pth = "/home/sondors/CANINE-epoch_4"
     # tokenizer_CANINE, model_CANINE = load_model_CANINE(model_pth, device, label2id, id2label)
@@ -149,7 +149,7 @@ if __name__ == "__main__":
         df_BERT = df.copy()
         df_BERT['PRICE_NAME'] = df_BERT['PRICE_NAME'].apply(process_text)
 
-        df_BERT = apply_on_df(model, tokenizer, df_BERT, column = 'PRICE_NAME')
+        df_BERT = apply_on_df(model, tokenizer, df_BERT, device, column = 'PRICE_NAME')
 
         df_original['width_pred'] = df_BERT['width_pred'].apply(process_digits)
         df_original['height_pred'] = df_BERT['height_pred'].apply(process_digits)
